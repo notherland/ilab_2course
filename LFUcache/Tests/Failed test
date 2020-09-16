@@ -1,0 +1,20 @@
+Cache size :
+3
+Number of requests :
+5
+1 1 2 2 2
+New elem: 1
+newelem.nreq  = 1
+Newelem.nreq in cache and in hash: 1 1
+Old elem: 1
+New elem: 2
+newelem.nreq  = 1
+Newelem.nreq in cache and in hash: 3 3
+Old elem: 2
+Old elem: 2
+
+End
+hits : 2
+Cache :
+index = 2  nreq = 2
+index = 1  nreq = 2
