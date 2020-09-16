@@ -26,7 +26,7 @@ public:
             std::cout << "index = " << i.first << "  nreq = " << i.second->nreq << std::endl;
         }
     }
-    
+
     ~LFUcache(){ //Destructor
         cache.clear();
         hash.clear();
@@ -55,12 +55,12 @@ bool LFUcache::lookup(int index) {
     if (elem == hash.end()) // there is no element with index in cache
     {
         page_t newelem;
-        std::cout << "New elem" << std::endl;
+        std::cout << "New elem: " << index << std::endl;
         if (isfull()) // if cache is full create or ignore new element
         {
             //std::cout << newelem.nreq;
             if (newelem.nreq >= cache.end()->nreq) {
-                
+
                 cache.erase(cache.end());
                 cache.insert(cache.end(), newelem);
                 std::pair<int, it> newhashnode(index, cache.end());
@@ -77,9 +77,10 @@ bool LFUcache::lookup(int index) {
         }
         return true;
     } else {//increasing number of requests for element which is already existed in cache
+        std::cout << "Old elem: " << index << std::endl;
         elem->second->nreq += 1;
         //std::cout << "Old elem requests : " << elem->second->nreq << " " << std::endl;
-        print();
+        //print();
         cache.sort(Comparator);
         return false;
     }
@@ -103,7 +104,7 @@ int main() {
         //cache.print();
     }
 
-    std::cout << "hits : " << hits << std::endl;
+    std::cout << std::endl<< "End" << std::endl << "hits : " << hits << std::endl;
     cache.print();
 
     return 0;
