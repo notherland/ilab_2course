@@ -3,11 +3,13 @@
 #include <unordered_map>
 
 struct page_t {
-    page_t() {
+    page_t(int index) {
+        id = index;
         nreq = 1;
         data = 0;
     }
 
+    int id;
     int nreq;
     int data;
 };
@@ -21,13 +23,13 @@ public:
     bool lookup(int index);
 
     void print() {
-        std::cout << "Cache :" << std::endl;
-        for (auto i : hash) {
-            std::cout << "index = " << i.first << "  nreq = " << i.second->nreq << std::endl;
+        std::cout << "Cache :" << std::endl << "cache size = " << cache.size() << std::endl;
+        for (auto i : cache) {
+            std::cout << "index = " << i.id << "  nreq = " << i.nreq << std::endl;
         }
     }
 
-    ~LFUcache(){ //Destructor
+    ~LFUcache() { //Destructor
         cache.clear();
         hash.clear();
         capacity = 0;
@@ -46,7 +48,7 @@ private:
 };
 
 bool Comparator(const page_t &el1, const page_t &el2) {
-    return el1.nreq > el2.nreq;
+    return el1.nreq < el2.nreq;
 }
 
 bool LFUcache::lookup(int index) {
@@ -54,30 +56,27 @@ bool LFUcache::lookup(int index) {
 
     if (elem == hash.end()) // there is no element with index in cache
     {
-        page_t newelem;
-        std::cout << "New elem: " << index << std::endl;
-        if (isfull()) // if cache is full create or ignore new element
+        page_t newelem{index};
+        //std::cout << "New elem: " << index << std::endl;
+        //print();
+        if ((isfull()))//create new element instead of elem with the least nreq
         {
-            //std::cout << newelem.nreq;
-            if (newelem.nreq >= cache.end()->nreq) {
-
-                cache.erase(cache.end());
-                cache.insert(cache.end(), newelem);
-                std::pair<int, it> newhashnode(index, cache.end());
-                hash.insert(newhashnode);
+            if (newelem.nreq >= cache.back().nreq) {
+                //std::cout << "Full" << std::endl;
+                hash.erase(cache.front().id);
+                cache.pop_front();
+                cache.push_front(newelem);
+                hash[index] = cache.begin();
             }
-        } else // if cache is not full create new element
-        {
-            std::cout << "newelem.nreq  = " << newelem.nreq << std::endl;
-            cache.push_back(newelem);
-            std::pair<int, it> newhashnode(index, cache.end());
-            hash.insert(newhashnode);
-            //print();
-            std::cout << "Newelem.nreq in cache and in hash: " << cache.end()->nreq << " " << hash[index]->nreq << std::endl;
+        } else {
+            //std::cout << "Not full" << std::endl;
+            cache.push_front(newelem);
+            hash[index] = cache.begin();
         }
+        //print();
         return true;
     } else {//increasing number of requests for element which is already existed in cache
-        std::cout << "Old elem: " << index << std::endl;
+        //std::cout << "Old elem: " << index << std::endl;
         elem->second->nreq += 1;
         //std::cout << "Old elem requests : " << elem->second->nreq << " " << std::endl;
         //print();
@@ -104,7 +103,7 @@ int main() {
         //cache.print();
     }
 
-    std::cout << std::endl<< "End" << std::endl << "hits : " << hits << std::endl;
+    std::cout << "hits : " << hits << std::endl;
     cache.print();
 
     return 0;
