@@ -1,0 +1,1 @@
+/usr/bin/c++  -g   CMakeFiles/Triangle.dir/Triangles.cpp.o CMakeFiles/Triangle.dir/main.cpp.o CMakeFiles/Triangle.dir/Check_crossing.cpp.o  -o Triangle 

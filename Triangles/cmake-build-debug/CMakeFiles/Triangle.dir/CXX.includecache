@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ksenia/Desktop/Proga/Triangle/Triangles.h
+iostream
+-
+cmath
+-
+vector
+-
+istream
+-
+fstream
+-
+math.h
+-
+
+/home/ksenia/Desktop/Proga/Triangle/main.cpp
+Triangles.h
+/home/ksenia/Desktop/Proga/Triangle/Triangles.h
+
