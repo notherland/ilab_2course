@@ -1,16 +1,26 @@
 #include "Triangles.h"
 
 //point_t
-bool point_t::is_valid() const{
-    if (finitef(x) == 0|| finitef(y) == 0 || finitef(z) == 0)
+
+std::istream& operator >> (std::istream &in, point_t& p){
+    in >> p.x;
+    in >> p.y;
+    in >> p.z;
+
+    return in;
+}
+
+bool point_t::is_equal (const point_t& p) const{
+
+    if (fabs(x - p.getx()) > flt_tolerance || fabs(y - p.gety()) > flt_tolerance || fabs(z - p.getz()) > flt_tolerance)
         return false;
     return true;
 }
 
-bool point_t::is_equal(const point_t &rhs) const{
-    if (std::abs(x - rhs.getx()) < flt_tolerance && std::abs(y - rhs.gety()) < flt_tolerance && std::abs(z - rhs.getz()) < flt_tolerance)
-        return true;
-    return false;
+bool point_t::is_valid() const{
+    if (finitef(x) == 0|| finitef(y) == 0 || finitef(z) == 0)
+        return false;
+    return true;
 }
 
 //plane_t
@@ -18,21 +28,25 @@ bool plane_t::is_parallel (plane_t plane) const {
     float kA = NAN, kB = NAN, kC = NAN;
     if (!plane.is_valid())
         return false;
-    if (plane.A != 0) {
-        kA = A / plane.A;}
-    if (plane.B != 0){
-        kB = B / plane.B;}
-    if (plane.C != 0)
-        kC = C / plane.C;
-    if (kA == kB == kC)
-        return true;
+    if (plane.getA() != 0) {
+        kA = A / plane.getA();}
+    if (plane.getB() != 0){
+        kB = B / plane.getB();}
+    if (plane.getC() != 0)
+        kC = C / plane.getC();
+    if (finitef(kA) != 0 && finitef(kB) != 0 && fabs(kA - kB) > flt_tolerance)
+        return false;
+    if (finitef(kA) != 0 && finitef(kC) != 0 && fabs(kA - kC) > flt_tolerance)
+        return false;
+    if (finitef(kB) != 0 && finitef(kC) != 0 && fabs(kB - kC) > flt_tolerance)
+        return false;
+    if (plane.getA() == 0 && A != 0)
+        return false;
+    if (plane.getB() == 0 && B != 0)
+        return false;
+    if (plane.getC() == 0 && C != 0)
+        return false;
 
-    if (plane.A == 0 && A != 0)
-        return false;
-    if (plane.B == 0 && B != 0)
-        return false;
-    if (plane.C == 0 && C != 0)
-        return false;
     return true;
 }
 
@@ -58,7 +72,7 @@ bool plane_t::is_equal (plane_t plane) const {
             return true;
         return false;
     }
-    if (D / plane.D == k){
+    if (abs (D / plane.D - k) <= flt_tolerance){
         return true;
     }
     return false;
@@ -120,13 +134,12 @@ point_t line_t::intersection(line_t line) const
 }
 
 point_t line_t::projection_p (point_t p) const {
-    if (!is_valid())
+    if (!is_valid() || !p.is_valid())
     {
         point_t in_val;
         return in_val;
     }
-    float d = - (ax * p.getx() + ay * p.gety() + az * p.getz());
-    float k = (-d - ax * x0 - ay * y0 - ax * z0) / (ax * ax + ay * ay + az * az);
+    float k = (ax * p.getx() + ay * p.gety() + az * p.getz() - (ax * x0 + ay * y0 + az * z0)) / (ax * ax + ay * ay + az * az);
     float x = ax * k + x0;
     float y = ay * k + y0;
     float z = az * k + z0;
@@ -148,14 +161,15 @@ bool line_t::is_valid() const {
 //vector_t
 
 bool vector_t::is_codir (const vector_t vector) const{
-    if (vector.compx() * compx() + vector.compy() * compy() +  vector.compz() * compz() > 0) // scalar product
+    float scalar_prod = vector.compx() * compx() + vector.compy() * compy() +  vector.compz() * compz();
+    if (scalar_prod >= flt_tolerance)
         return true;
     return false;
 }
 
 bool vector_t::is_crossing(const vector_t& vec) const{
-    vector_t A1A2 {p1, vec.p1}, A1B1 {p1, p2}, B1A2 {p2, vec.p1}, A1B2 {p1, vec.p2}, B1B2 {vec.p2, vec.p2};
-    if ((A1A2.length() <= A1B1.length() && B1A2.length() <= A1A2.length()) || (A1B2.length() <= A1A2.length() && B1B2.length() <= A1A2.length()))
+    vector_t A1A2 {p1, vec.p1}, A1B1 {p1, p2}, B1A2 {p2, vec.p1}, A1B2 {p1, vec.p2}, B1B2 {p2, vec.p2}, A2B2{vec.p1, vec.p2};
+    if ((A1A2.length() <= A1B1.length() && B1A2.length() <= A1B1.length()) || (A1B2.length() <= A1B1.length() && B1B2.length() <= A1B1.length()) || (A1A2.length() <= A2B2.length() && A1B2.length() <= A1A2.length()))
         return true;
     else
         return false;
@@ -164,6 +178,12 @@ bool vector_t::is_crossing(const vector_t& vec) const{
 void vector_t::print() const{ //print
     p1.print();
     p2.print();
+}
+
+bool vector_t::is_equal (const vector_t& vec) const{
+    if ((vec.getp1().is_equal(p1) && vec.getp2().is_equal(p2)) || (vec.getp1().is_equal(p2) && vec.getp2().is_equal(p1)))
+        return true;
+    return false;
 }
 
 bool vector_t::is_valid() const{
@@ -180,49 +200,45 @@ vector_t triangle_t::vec_cross_l (line_t cross_l) const{
     if (!is_valid())
     {
         std::cout << "Triangle is not valid\n";
+        print();
         return vector;
     }
 
     point_t proj_A = cross_l.projection_p(A);
     vector_t vecA {A, proj_A};
-    vecA.print();
-    std:: cout <<"- vecA\n";
     point_t proj_B = cross_l.projection_p(B);
     vector_t vecB {B, proj_B};
-    vecB.print();
-    std:: cout <<"-vecB\n";
     point_t proj_C = cross_l.projection_p(C);
     vector_t vecC {C, proj_C};
-    vecC.print();
-    std:: cout <<"-vecC\n";
     point_t p1, p2, p3;
-    if (!vecB.is_codir(vecA))
-    {
-        std::cout << "p1\n";
-        AB.print();
-        cross_l.print();
+
+    /*vecA.print();
+    std::cout << " - vecA\n";
+    vecB.print();
+    std::cout << " - vecB\n";
+    vecC.print();
+    std::cout << " - vecC\n";*/
+
+
+    if (!vecB.is_codir(vecA)){
         p1 = AB.intersection(cross_l);
     }
-    if (!vecA.is_codir(vecC))
-    {
-        std::cout << "p2";
+    if (!vecA.is_codir(vecC)){
         p2 = AC.intersection(cross_l);
     }
-    if (!vecC.is_codir(vecB))
-    {
-        std::cout << "p3";
-        BC.print();
-        cross_l.print();
-        std::cout << "\n";
+    if (!vecC.is_codir(vecB)){
         p3 = BC.intersection(cross_l);
     }
-    p1.print();
+
+    /*p1.print();
+    std::cout << std::endl;
     p2.print();
+    std::cout << std::endl;
     p3.print();
+    std::cout << std::endl;*/
 
     if (p1.is_valid() && p2.is_valid())
     {
-        std::cout << p2.is_valid();
         vector_t new_vec{p1, p2};
         vector = new_vec;
         return vector;
@@ -235,7 +251,6 @@ vector_t triangle_t::vec_cross_l (line_t cross_l) const{
     }
     if (p1.is_valid() && p3.is_valid())
     {
-        //std::cout << p3.is_valid();
         vector_t new_vec{p1, p3};
         vector = new_vec;
         return vector;
