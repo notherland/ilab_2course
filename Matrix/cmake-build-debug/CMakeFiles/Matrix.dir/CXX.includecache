@@ -1,0 +1,28 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ksenia/Desktop/Proga/Matrix/Matrix.h
+iostream
+-
+algorithm
+-
+vector
+-
+
+/home/ksenia/Desktop/Proga/Matrix/RecursiveDet.cpp
+Matrix.h
+/home/ksenia/Desktop/Proga/Matrix/Matrix.h
+
+/home/ksenia/Desktop/Proga/Matrix/main.cpp
+RecursiveDet.cpp
+/home/ksenia/Desktop/Proga/Matrix/RecursiveDet.cpp
+vector
+-
+iostream
+-
+
